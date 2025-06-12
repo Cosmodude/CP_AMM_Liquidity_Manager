@@ -1,4 +1,4 @@
-Interview task (Rust): Raydium Add/Remove Liquidity
+**Interview task (Rust): Raydium Add/Remove Liquidity**
 Write a Rust program which integrates with the Raydium CP-AMM on Solana Devnet and demonstrates the following:
 
 Initialize a CP-AMM pool using an SPL token pair (you can use custom or existing Devnet SPL tokens)
@@ -14,7 +14,7 @@ You can choose if you want to do this off-chain (RPC client) or on-chain (CPI pr
 Make a Pull Request to this repository with your solution. 
 
 
-Interview Task (Solidity ) — Uniswap-style CP-AMM Liquidity Manager
+**Interview Task (Solidity ) — Uniswap-style CP-AMM Liquidity Manager**
 
 Write a liquidity management assignment on an EVM chain using Solidity and a classic constant-product AMM (Uniswap V2-style).  
 Work on Ethereum Sepolia, Goerli, or any compatible EVM dev-net (Base Sepolia, Polygon Amoy, etc.).  

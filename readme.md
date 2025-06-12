@@ -21,6 +21,7 @@ Work on Ethereum Sepolia, Goerli, or any compatible EVM dev-net (Base Sepolia, P
 Submit a Pull Request to this repo with your finished work.
 
 Required Tasks
+
 2.1 Pool Initialization
 1. Deploy or obtain two ERC-20 tokens on your testnet.  
 2. Use the Uniswap V2 Factor* to create a new pair (`createPair`).  
@@ -91,4 +92,4 @@ Your README must include:
 * Gas summary (`hardhat-gas-reporter` or `forge test --gas-report`)
 
 PR title format:
-Solidity Liquidity Manager Task – <your name>
+Solidity Liquidity Manager Task

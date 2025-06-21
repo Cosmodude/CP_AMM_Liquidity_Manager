@@ -11,7 +11,9 @@ import { console } from "forge-std/src/console.sol";
 
 contract PoolInit is Script {
     function run() public returns (Token tokenA, Token tokenB, address pair, uint256 liquidity) {
-        vm.startBroadcast();
+        address caller = vm.envAddress("DEV_ADDRESS");
+        
+        vm.startPrank(caller);
 
         address routerAddress = vm.envAddress("UNISWAP_V2_ROUTER_ADDRESS_SEPOLIA");
         uint256 mintAmount = 1_000_000_000_000_000_000;
@@ -30,11 +32,14 @@ contract PoolInit is Script {
         console.log("Token A deployed at:", address(tokenA));
         console.log("Token B deployed at:", address(tokenB));
 
-        // Mint tokens to msg.sender
-        tokenA.mint(msg.sender, mintAmount);
-        tokenB.mint(msg.sender, mintAmount);
+        // Mint tokens to the caller
+        tokenA.mint(caller, mintAmount);
+        tokenB.mint(caller, mintAmount);
+
+        require(tokenA.balanceOf(caller) == mintAmount, "Token A balance mismatch");
+        require(tokenB.balanceOf(caller) == mintAmount, "Token B balance mismatch");
         
-        console.log("Minted", mintAmount, "tokens of each type to", msg.sender);
+        console.log("Minted", mintAmount, "tokens of each type to", caller);
 
         // Add liquidity through router (creates pair automatically)
         IUniswapV2Router02 router = IUniswapV2Router02(routerAddress);
@@ -49,7 +54,7 @@ contract PoolInit is Script {
             liquidityAmountB,
             0, // amountAMin - no slippage protection for seeding
             0, // amountBMin - no slippage protection for seeding
-            msg.sender,
+            caller,
             block.timestamp + 300
         );
 
@@ -65,6 +70,6 @@ contract PoolInit is Script {
         console.log("Liquidity pair:", pair);
         console.log("Liquidity tokens received:", liquidity);
 
-        vm.stopBroadcast();
+        vm.stopPrank();
     }
 } 

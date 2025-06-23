@@ -32,6 +32,18 @@ Setup a secure secret key setup using `cast wallet`. And fund it with ETH.
 
 # Run
 
+Build
+```sh
+forge build
+```
+
+Test 
+```sh
+forge test
+```
+
+## Deploy 
+
 Check balance sepolia: 
 ```sh
 cast balance <wallet_address> --rpc-url sepolia
@@ -41,6 +53,11 @@ Run combined setup script:
 ```sh 
 # Get your private key from Cast wallet and use it directly
 forge script script/PoolInit.s.sol --rpc-url sepolia --account <saved_wallet_name> --broadcast
+```
+
+Deploy Liqudity Manager
+```sh
+   forge script script/DeployLiqManager.s.sol --rpc-url sepolia --account <saved_wallet_name> --broadcast
 ```
 
 ### Sensible Defaults
@@ -83,14 +100,6 @@ Delete the build artifacts and cache directories:
 
 ```sh
 $ forge clean
-```
-
-### Compile
-
-Compile the contracts:
-
-```sh
-$ forge build
 ```
 
 ### Coverage

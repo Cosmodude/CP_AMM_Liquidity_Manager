@@ -62,15 +62,9 @@ contract LiqManager {
     function removeExactLiquidity(uint256 lpAmount) external {
         PAIR.transferFrom(msg.sender, address(this), lpAmount);
         PAIR.approve(address(ROUTER), lpAmount);
-        
+
         (uint256 amountA, uint256 amountB) = ROUTER.removeLiquidity(
-            address(TOKEN_A),
-            address(TOKEN_B),
-            lpAmount,
-            0,
-            0,
-            msg.sender,
-            block.timestamp + 300
+            address(TOKEN_A), address(TOKEN_B), lpAmount, 0, 0, msg.sender, block.timestamp + 300
         );
 
         emit LiquidityRemoved(msg.sender, lpAmount, amountA, amountB);
@@ -109,13 +103,7 @@ contract LiqManager {
         PAIR.approve(address(ROUTER), liquidity);
 
         (uint256 amountAOut, uint256 amountBOut) = ROUTER.removeLiquidity(
-            address(TOKEN_A),
-            address(TOKEN_B),
-            liquidity,
-            0,
-            0,
-            address(this),
-            block.timestamp + 300
+            address(TOKEN_A), address(TOKEN_B), liquidity, 0, 0, address(this), block.timestamp + 300
         );
 
         uint256 remainingA = TOKEN_A.balanceOf(address(this));

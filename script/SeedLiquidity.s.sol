@@ -13,7 +13,7 @@ contract SeedLiquidity is Script {
         address routerAddress = vm.envAddress("UNISWAP_V2_ROUTER_ADDRESS_SEPOLIA");
         address tokenA = vm.envAddress("TOKEN_A_ADDRESS");
         address tokenB = vm.envAddress("TOKEN_B_ADDRESS");
-        
+
         uint256 amountADesired = 100_000_000_000_000_000;
         uint256 amountBDesired = 100_000_000_000_000_000;
 
@@ -45,4 +45,4 @@ contract SeedLiquidity is Script {
 
         vm.stopBroadcast();
     }
-} 
+}

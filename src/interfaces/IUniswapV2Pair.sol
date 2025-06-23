@@ -10,4 +10,4 @@ interface IUniswapV2Pair {
     function approve(address spender, uint256 amount) external returns (bool);
     function burn(address to) external returns (uint256 amount0, uint256 amount1);
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
-} 
+}

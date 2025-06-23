@@ -18,7 +18,7 @@ contract CreatePairOnly is Script {
         console.log("Token B address:", tokenB);
 
         IUniswapV2Factory factory = IUniswapV2Factory(factoryAddress);
-        
+
         address existingPair = factory.getPair(tokenA, tokenB);
         if (existingPair != address(0)) {
             console.log("Pair already exists at:", existingPair);
@@ -26,9 +26,9 @@ contract CreatePairOnly is Script {
         }
 
         pair = factory.createPair(tokenA, tokenB);
-        
+
         console.log("Created new pair at address:", pair);
 
         vm.stopBroadcast();
     }
-} 
+}

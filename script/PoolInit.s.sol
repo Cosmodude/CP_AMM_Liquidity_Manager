@@ -39,7 +39,7 @@ contract PoolInit is Script {
         // Deploy tokens
         tokenA = new Token("Token A", "TKA");
         tokenB = new Token("Token B", "TKB");
-        
+
         console.log("Token A deployed at:", address(tokenA));
         console.log("Token B deployed at:", address(tokenB));
 
@@ -49,7 +49,7 @@ contract PoolInit is Script {
 
         require(tokenA.balanceOf(data.caller) == data.mintAmount, "Token A balance mismatch");
         require(tokenB.balanceOf(data.caller) == data.mintAmount, "Token B balance mismatch");
-        
+
         console.log("Minted", data.mintAmount, "tokens of each type to", data.caller);
 
         // Add liquidity through router (creates pair automatically)
@@ -82,4 +82,4 @@ contract PoolInit is Script {
 
         vm.stopPrank();
     }
-} 
+}

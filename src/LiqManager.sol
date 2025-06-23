@@ -11,24 +11,11 @@ contract LiqManager {
     IERC20 public immutable tokenA;
     IERC20 public immutable tokenB;
 
-    event LiquidityAdded(
-        address indexed user,
-        uint256 lpAmount,
-        uint256 amountA,
-        uint256 amountB
-    );
+    event LiquidityAdded(address indexed user, uint256 lpAmount, uint256 amountA, uint256 amountB);
 
-    event LiquidityRemoved(
-        address indexed user,
-        uint256 lpAmount,
-        uint256 amountA,
-        uint256 amountB
-    );
+    event LiquidityRemoved(address indexed user, uint256 lpAmount, uint256 amountA, uint256 amountB);
 
-    constructor(
-        address _router,
-        address _pair
-    ) {
+    constructor(address _router, address _pair) {
         router = IUniswapV2Router02(_router);
         pair = IUniswapV2Pair(_pair);
         tokenA = IERC20(pair.token0());
@@ -53,20 +40,10 @@ contract LiqManager {
         tokenB.approve(address(router), amountBDesired);
 
         (uint256 amountA, uint256 amountB, uint256 liquidity) = router.addLiquidity(
-            address(tokenA),
-            address(tokenB),
-            amountADesired,
-            amountBDesired,
-            0,
-            0,
-            msg.sender,
-            block.timestamp + 300
+            address(tokenA), address(tokenB), amountADesired, amountBDesired, 0, 0, msg.sender, block.timestamp + 300
         );
 
-        require(
-            liquidity >= lpAmountDesired - 1 && liquidity <= lpAmountDesired + 1,
-            "LP amount mismatch"
-        );
+        require(liquidity >= lpAmountDesired - 1 && liquidity <= lpAmountDesired + 1, "LP amount mismatch");
 
         if (amountA < amountADesired) {
             tokenA.transfer(msg.sender, amountADesired - amountA);

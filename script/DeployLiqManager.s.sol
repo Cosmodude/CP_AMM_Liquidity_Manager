@@ -9,7 +9,7 @@ contract DeployLiqManager is Script {
     function run() public returns (LiqManager liqManager) {
         address caller = vm.envAddress("DEV_ADDRESS");
 
-        vm.startPrank(caller);
+        vm.startBroadcast(caller);
 
         address routerAddress = vm.envAddress("UNISWAP_V2_ROUTER_ADDRESS_SEPOLIA");
         address pairAddress = vm.envAddress("PAIR_ADDRESS");
@@ -23,6 +23,6 @@ contract DeployLiqManager is Script {
 
         console.log("LiqManager deployed at:", address(liqManager));
 
-        vm.stopPrank();
+        vm.stopBroadcast();
     }
 }

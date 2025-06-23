@@ -32,7 +32,7 @@ bun install
 
 Setup a secure secret key setup using `cast wallet`. And fund it with ETH.
 
-# Run
+# Usage
 
 Build
 
@@ -58,55 +58,13 @@ Run combined setup script:
 
 ```sh
 # Get your private key from Cast wallet and use it directly
-forge script script/PoolInit.s.sol --rpc-url sepolia --account <saved_wallet_name> --broadcast
+forge script script/PoolInit.s.sol --rpc-url sepolia --broadcast --verify -vvvv --account <saved_wallet_name>
 ```
 
 Deploy Liqudity Manager
 
 ```sh
-   forge script script/DeployLiqManager.s.sol --rpc-url sepolia --account <saved_wallet_name> --broadcast
-```
-
-### Sensible Defaults
-
-This template comes with a set of sensible default configurations for you to use. These defaults can be found in the
-following files:
-
-```text
-├── .editorconfig
-├── .gitignore
-├── .prettierignore
-├── .prettierrc.yml
-├── .solhint.json
-├── foundry.toml
-└── remappings.txt
-```
-
-### GitHub Actions
-
-This template comes with GitHub Actions pre-configured. Your contracts will be linted and tested on every push and pull
-request made to the `main` branch.
-
-You can edit the CI script in [.github/workflows/ci.yml](./.github/workflows/ci.yml).
-
-## Usage
-
-This is a list of the most frequently needed Forge commands.
-
-### Build
-
-Build the contracts:
-
-```sh
-$ forge build
-```
-
-### Clean
-
-Delete the build artifacts and cache directories:
-
-```sh
-$ forge clean
+   forge script script/DeployLiqManager.s.sol --rpc-url sepolia --broadcast --verify -vvvv --account <saved_wallet_name>
 ```
 
 ### Coverage
@@ -147,12 +105,41 @@ Generate test coverage and output result to the terminal:
 $ bun run test:coverage
 ```
 
-## Related Efforts
+# Active deployments 
 
-- [foundry-rs/forge-template](https://github.com/foundry-rs/forge-template)
-- [abigger87/femplate](https://github.com/abigger87/femplate)
-- [cleanunicorn/ethereum-smartcontract-template](https://github.com/cleanunicorn/ethereum-smartcontract-template)
-- [FrankieIsLost/forge-template](https://github.com/FrankieIsLost/forge-template)
+### Tokens:
+https://sepolia.etherscan.io/address/0x797ec03c3b6e684a1c231f9f4047ea4ecc388f26
+https://sepolia.etherscan.io/address/0x722a61c9cc95b48b3a75024d55f4e8d0e50ce994
+
+Mint functions permissionlessly enabled for both
+
+### Pair
+https://sepolia.etherscan.io/address/0x4d3fe708c572e92237a58280bd5eef8f438125bc
+
+### Manager 
+https://sepolia.etherscan.io/address/0xd205df6f243f27855bf9b68d0c67a9ba4abf3d40#code
+
+### Sensible Defaults
+
+This template comes with a set of sensible default configurations for you to use. These defaults can be found in the
+following files:
+
+```text
+├── .editorconfig
+├── .gitignore
+├── .prettierignore
+├── .prettierrc.yml
+├── .solhint.json
+├── foundry.toml
+└── remappings.txt
+```
+
+### GitHub Actions
+
+This template comes with GitHub Actions pre-configured. Your contracts will be linted and tested on every push and pull
+request made to the `main` branch.
+
+You can edit the CI script in [.github/workflows/ci.yml](./.github/workflows/ci.yml).
 
 ## License
 

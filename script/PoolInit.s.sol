@@ -30,7 +30,7 @@ contract PoolInit is Script {
             liquidityAmountB: 500_000_000_000_000_000
         });
 
-        vm.startPrank(data.caller);
+        vm.startBroadcast(data.caller);
 
         console.log("Router address:", data.routerAddress);
         console.log("Mint amount per token:", data.mintAmount);
@@ -81,6 +81,6 @@ contract PoolInit is Script {
         console.log("Liquidity pair:", pair);
         console.log("Liquidity tokens received:", liquidity);
 
-        vm.stopPrank();
+        vm.stopBroadcast();
     }
 }

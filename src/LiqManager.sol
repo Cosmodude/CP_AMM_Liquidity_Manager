@@ -60,9 +60,70 @@ contract LiqManager {
     }
 
     function removeExactLiquidity(uint256 lpAmount) external {
-        PAIR.transferFrom(msg.sender, address(PAIR), lpAmount);
-        (uint256 amountA, uint256 amountB) = PAIR.burn(msg.sender);
+        PAIR.transferFrom(msg.sender, address(this), lpAmount);
+        PAIR.approve(address(ROUTER), lpAmount);
+        
+        (uint256 amountA, uint256 amountB) = ROUTER.removeLiquidity(
+            address(TOKEN_A),
+            address(TOKEN_B),
+            lpAmount,
+            0,
+            0,
+            msg.sender,
+            block.timestamp + 300
+        );
 
         emit LiquidityRemoved(msg.sender, lpAmount, amountA, amountB);
+    }
+
+    function flashAddThenRemove(uint256 lpAmountDesired) external {
+        (uint112 reserve0, uint112 reserve1,) = PAIR.getReserves();
+        uint256 totalSupply = PAIR.totalSupply();
+
+        if (totalSupply == 0) revert NoLiquidityExists();
+
+        uint256 amountADesired = (lpAmountDesired * reserve0) / totalSupply;
+        uint256 amountBDesired = (lpAmountDesired * reserve1) / totalSupply;
+
+        if (amountADesired == 0 || amountBDesired == 0) revert InsufficientLiquidity();
+
+        TOKEN_A.transferFrom(msg.sender, address(this), amountADesired);
+        TOKEN_B.transferFrom(msg.sender, address(this), amountBDesired);
+
+        TOKEN_A.approve(address(ROUTER), amountADesired);
+        TOKEN_B.approve(address(ROUTER), amountBDesired);
+
+        (uint256 amountA, uint256 amountB, uint256 liquidity) = ROUTER.addLiquidity(
+            address(TOKEN_A),
+            address(TOKEN_B),
+            amountADesired,
+            amountBDesired,
+            0,
+            0,
+            address(this),
+            block.timestamp + 300
+        );
+
+        if (liquidity < lpAmountDesired - 1 || liquidity > lpAmountDesired + 1) revert LPAmountMismatch();
+
+        PAIR.approve(address(ROUTER), liquidity);
+
+        (uint256 amountAOut, uint256 amountBOut) = ROUTER.removeLiquidity(
+            address(TOKEN_A),
+            address(TOKEN_B),
+            liquidity,
+            0,
+            0,
+            address(this),
+            block.timestamp + 300
+        );
+
+        uint256 remainingA = TOKEN_A.balanceOf(address(this));
+        uint256 remainingB = TOKEN_B.balanceOf(address(this));
+        if (remainingA > 0) TOKEN_A.transfer(msg.sender, remainingA);
+        if (remainingB > 0) TOKEN_B.transfer(msg.sender, remainingB);
+
+        emit LiquidityAdded(msg.sender, lpAmountDesired, amountA, amountB);
+        emit LiquidityRemoved(msg.sender, lpAmountDesired, amountAOut, amountBOut);
     }
 }

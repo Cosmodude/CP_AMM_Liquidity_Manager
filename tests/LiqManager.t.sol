@@ -159,4 +159,126 @@ contract LiqManagerTest is Test {
 
         vm.stopPrank();
     }
+
+    function test_FlashAddThenRemove() public {
+        vm.startPrank(testUser2);
+
+        uint256 initialBalanceA = tokenA.balanceOf(testUser2);
+        uint256 initialBalanceB = tokenB.balanceOf(testUser2);
+        uint256 lpAmountDesired = 100_000_000_000_000_000;
+
+        tokenA.approve(address(liqManager), type(uint256).max);
+        tokenB.approve(address(liqManager), type(uint256).max);
+
+        liqManager.flashAddThenRemove(lpAmountDesired);
+
+        uint256 finalBalanceA = tokenA.balanceOf(testUser2);
+        uint256 finalBalanceB = tokenB.balanceOf(testUser2);
+
+        // User should receive approximately the same amount back (minus fees)
+        assertTrue(finalBalanceA >= initialBalanceA - 1, "Should receive the same amount of token A back");
+        assertTrue(finalBalanceB >= initialBalanceB - 1, "Should receive the same amount of token B back");
+
+        IUniswapV2Pair pairContract = IUniswapV2Pair(pair);
+        assertEq(pairContract.balanceOf(testUser2), 0, "Should not have any LP tokens");
+
+        vm.stopPrank();
+    }
+
+    function test_FlashAddThenRemove_WithSlippage() public {
+        vm.startPrank(testUser2);
+
+        uint256 initialBalanceA = tokenA.balanceOf(testUser2);
+        uint256 initialBalanceB = tokenB.balanceOf(testUser2);
+        uint256 lpAmountDesired = 50_000_000_000_000_000;
+
+        tokenA.approve(address(liqManager), type(uint256).max);
+        tokenB.approve(address(liqManager), type(uint256).max);
+
+        liqManager.flashAddThenRemove(lpAmountDesired);
+
+        uint256 finalBalanceA = tokenA.balanceOf(testUser2);
+        uint256 finalBalanceB = tokenB.balanceOf(testUser2);
+
+        assertTrue(finalBalanceA >= initialBalanceA, "Should not lose token A");
+        assertTrue(finalBalanceB >= initialBalanceB, "Should not lose token B");
+
+        vm.stopPrank();
+    }
+
+    function test_FlashAddThenRemove_RevertWhenNoLiquidity() public {
+        Token newTokenA = new Token("New Token A", "NTKA");
+        Token newTokenB = new Token("New Token B", "NTKB");
+
+        IUniswapV2Factory factoryContract = IUniswapV2Factory(factory);
+        address newPair = factoryContract.createPair(address(newTokenA), address(newTokenB));
+
+        LiqManager newLiqManager = new LiqManager(router, newPair);
+
+        vm.startPrank(testUser2);
+
+        newTokenA.mint(testUser2, 1_000_000_000_000_000_000_000);
+        newTokenB.mint(testUser2, 1_000_000_000_000_000_000_000);
+
+        newTokenA.approve(address(newLiqManager), type(uint256).max);
+        newTokenB.approve(address(newLiqManager), type(uint256).max);
+
+        vm.expectRevert(LiqManager.NoLiquidityExists.selector);
+        newLiqManager.flashAddThenRemove(100_000_000_000_000_000);
+
+        vm.stopPrank();
+    }
+
+    function test_FlashAddThenRemove_RevertWhenInsufficientBalance() public {
+        vm.startPrank(testUser2);
+
+        uint256 lpAmountDesired = 2_000_000_000_000_000_000;
+
+        tokenA.approve(address(liqManager), type(uint256).max);
+        tokenB.approve(address(liqManager), type(uint256).max);
+
+        vm.expectRevert();
+        liqManager.flashAddThenRemove(lpAmountDesired);
+
+        vm.stopPrank();
+    }
+
+    function test_FlashAddThenRemove_ContractStateCleanup() public {
+        vm.startPrank(testUser2);
+
+        uint256 lpAmountDesired = 100_000_000_000_000_000;
+
+        tokenA.approve(address(liqManager), type(uint256).max);
+        tokenB.approve(address(liqManager), type(uint256).max);
+
+        liqManager.flashAddThenRemove(lpAmountDesired);
+
+        assertEq(tokenA.balanceOf(address(liqManager)), 0, "Contract should have no token A");
+        assertEq(tokenB.balanceOf(address(liqManager)), 0, "Contract should have no token B");
+
+        IUniswapV2Pair pairContract = IUniswapV2Pair(pair);
+        assertEq(pairContract.balanceOf(address(liqManager)), 0, "Contract should have no LP tokens");
+
+        vm.stopPrank();
+    }
+
+    function test_FlashAddThenRemove_EventEmission() public {
+        vm.startPrank(testUser2);
+
+        uint256 lpAmountDesired = 100_000_000_000_000_000;
+
+        tokenA.approve(address(liqManager), type(uint256).max);
+        tokenB.approve(address(liqManager), type(uint256).max);
+
+        // Expect events to be emitted with the correct user and lpAmountDesired
+        vm.expectEmit(true, false, false, false);
+        emit LiqManager.LiquidityAdded(testUser2, lpAmountDesired, 0, 0);
+
+        vm.expectEmit(true, false, false, false);
+        emit LiqManager.LiquidityRemoved(testUser2, lpAmountDesired, 0, 0);
+
+        liqManager.flashAddThenRemove(lpAmountDesired);
+
+        vm.stopPrank();
+    }
 }

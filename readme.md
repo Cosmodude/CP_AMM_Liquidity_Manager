@@ -105,18 +105,21 @@ Generate test coverage and output result to the terminal:
 $ bun run test:coverage
 ```
 
-# Active deployments 
+# Active deployments
 
 ### Tokens:
+
 https://sepolia.etherscan.io/address/0x797ec03c3b6e684a1c231f9f4047ea4ecc388f26
 https://sepolia.etherscan.io/address/0x722a61c9cc95b48b3a75024d55f4e8d0e50ce994
 
 Mint functions permissionlessly enabled for both
 
 ### Pair
+
 https://sepolia.etherscan.io/address/0x4d3fe708c572e92237a58280bd5eef8f438125bc
 
-### Manager 
+### Manager
+
 https://sepolia.etherscan.io/address/0xd205df6f243f27855bf9b68d0c67a9ba4abf3d40#code
 
 ### Sensible Defaults

@@ -10,20 +10,31 @@ import { IERC20 } from "../src/interfaces/IERC20.sol";
 import { console } from "forge-std/src/console.sol";
 
 contract PoolInit is Script {
+    struct DeploymentData {
+        address caller;
+        address routerAddress;
+        address factoryAddress;
+        uint256 mintAmount;
+        uint256 liquidityAmountA;
+        uint256 liquidityAmountB;
+    }
+
     function run() public returns (Token tokenA, Token tokenB, address pair, uint256 liquidity) {
-        address caller = vm.envAddress("DEV_ADDRESS");
-        
-        vm.startPrank(caller);
+        DeploymentData memory data = DeploymentData({
+            caller: vm.envAddress("DEV_ADDRESS"),
+            routerAddress: vm.envAddress("UNISWAP_V2_ROUTER_ADDRESS_SEPOLIA"),
+            factoryAddress: vm.envAddress("UNISWAP_V2_FACTORY_ADDRESS_SEPOLIA"),
+            mintAmount: 1_000_000_000_000_000_000,
+            liquidityAmountA: 500_000_000_000_000_000,
+            liquidityAmountB: 500_000_000_000_000_000
+        });
 
-        address routerAddress = vm.envAddress("UNISWAP_V2_ROUTER_ADDRESS_SEPOLIA");
-        uint256 mintAmount = 1_000_000_000_000_000_000;
-        uint256 liquidityAmountA = 500_000_000_000_000_000;
-        uint256 liquidityAmountB = 500_000_000_000_000_000;
+        vm.startPrank(data.caller);
 
-        console.log("Router address:", routerAddress);
-        console.log("Mint amount per token:", mintAmount);
-        console.log("Liquidity amount A:", liquidityAmountA);
-        console.log("Liquidity amount B:", liquidityAmountB);
+        console.log("Router address:", data.routerAddress);
+        console.log("Mint amount per token:", data.mintAmount);
+        console.log("Liquidity amount A:", data.liquidityAmountA);
+        console.log("Liquidity amount B:", data.liquidityAmountB);
 
         // Deploy tokens
         tokenA = new Token("Token A", "TKA");
@@ -33,36 +44,35 @@ contract PoolInit is Script {
         console.log("Token B deployed at:", address(tokenB));
 
         // Mint tokens to the caller
-        tokenA.mint(caller, mintAmount);
-        tokenB.mint(caller, mintAmount);
+        tokenA.mint(data.caller, data.mintAmount);
+        tokenB.mint(data.caller, data.mintAmount);
 
-        require(tokenA.balanceOf(caller) == mintAmount, "Token A balance mismatch");
-        require(tokenB.balanceOf(caller) == mintAmount, "Token B balance mismatch");
+        require(tokenA.balanceOf(data.caller) == data.mintAmount, "Token A balance mismatch");
+        require(tokenB.balanceOf(data.caller) == data.mintAmount, "Token B balance mismatch");
         
-        console.log("Minted", mintAmount, "tokens of each type to", caller);
+        console.log("Minted", data.mintAmount, "tokens of each type to", data.caller);
 
         // Add liquidity through router (creates pair automatically)
-        IUniswapV2Router02 router = IUniswapV2Router02(routerAddress);
+        IUniswapV2Router02 router = IUniswapV2Router02(data.routerAddress);
 
-        tokenA.approve(routerAddress, liquidityAmountA);
-        tokenB.approve(routerAddress, liquidityAmountB);
+        tokenA.approve(data.routerAddress, data.liquidityAmountA);
+        tokenB.approve(data.routerAddress, data.liquidityAmountB);
 
         (uint256 amountA, uint256 amountB, uint256 liquidityReceived) = router.addLiquidity(
             address(tokenA),
             address(tokenB),
-            liquidityAmountA,
-            liquidityAmountB,
+            data.liquidityAmountA,
+            data.liquidityAmountB,
             0, // amountAMin - no slippage protection for seeding
             0, // amountBMin - no slippage protection for seeding
-            caller,
+            data.caller,
             block.timestamp + 300
         );
 
         liquidity = liquidityReceived;
 
         // Get pair address
-        address factoryAddress = vm.envAddress("UNISWAP_V2_FACTORY_ADDRESS_SEPOLIA");
-        IUniswapV2Factory factory = IUniswapV2Factory(factoryAddress);
+        IUniswapV2Factory factory = IUniswapV2Factory(data.factoryAddress);
         pair = factory.getPair(address(tokenA), address(tokenB));
 
         console.log("Added liquidity - Amount A:", amountA);

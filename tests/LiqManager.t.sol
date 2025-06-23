@@ -2,14 +2,11 @@
 pragma solidity >=0.8.29 <0.9.0;
 
 import { Test } from "forge-std/src/Test.sol";
-import { console } from "forge-std/src/console.sol";
 import { LiqManager } from "../src/LiqManager.sol";
 import { Token } from "../src/TokenA.sol";
 import { PoolInit } from "../script/PoolInit.s.sol";
 import { IUniswapV2Factory } from "../src/interfaces/IUniswapV2Factory.sol";
 import { IUniswapV2Pair } from "../src/interfaces/IUniswapV2Pair.sol";
-import { IERC20 } from "../src/interfaces/IERC20.sol";
-import { IUniswapV2Router02 } from "../src/interfaces/IUniswapV2Router02.sol";
 
 contract LiqManagerTest is Test {
     LiqManager public liqManager;
@@ -20,12 +17,12 @@ contract LiqManagerTest is Test {
     address public factory;
     uint256 public initialLiquidity;
 
-    address testUser = makeAddr("testUser");
-    address testUser2 = makeAddr("testUser2");
+    address public testUser = makeAddr("testUser");
+    address public testUser2 = makeAddr("testUser2");
 
-    uint256 mintAmount = 1_000_000_000_000_000_000;
-    uint256 liquidityAmountA = 500_000_000_000_000_000;
-    uint256 liquidityAmountB = 500_000_000_000_000_000;
+    uint256 public mintAmount = 1_000_000_000_000_000_000;
+    uint256 public liquidityAmountA = 500_000_000_000_000_000;
+    uint256 public liquidityAmountB = 500_000_000_000_000_000;
 
     function setUp() public {
         vm.createSelectFork(vm.envString("SEPOLIA_RPC_URL"));
@@ -122,13 +119,13 @@ contract LiqManagerTest is Test {
         newTokenA.approve(address(newLiqManager), type(uint256).max);
         newTokenB.approve(address(newLiqManager), type(uint256).max);
 
-        vm.expectRevert("No liquidity exists");
+        vm.expectRevert(LiqManager.NoLiquidityExists.selector);
         newLiqManager.addLiquidityByMint(100_000_000_000_000_000);
 
         vm.stopPrank();
     }
 
-    function test_AddLiquidityByMint_RevertWhenInsufficientLiquidity() public {
+    function test_AddLiquidityByMint_RevertWhenInsufficientBalance() public {
         vm.startPrank(testUser);
 
         // user has 0.5 of each token

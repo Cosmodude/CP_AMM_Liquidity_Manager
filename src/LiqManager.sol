@@ -1,63 +1,67 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.29;
 
-import "./interfaces/IUniswapV2Router02.sol";
-import "./interfaces/IUniswapV2Pair.sol";
-import "./interfaces/IERC20.sol";
+import { IUniswapV2Router02 } from "./interfaces/IUniswapV2Router02.sol";
+import { IUniswapV2Pair } from "./interfaces/IUniswapV2Pair.sol";
+import { IERC20 } from "./interfaces/IERC20.sol";
 
 contract LiqManager {
-    IUniswapV2Router02 public immutable router;
-    IUniswapV2Pair public immutable pair;
-    IERC20 public immutable tokenA;
-    IERC20 public immutable tokenB;
+    error NoLiquidityExists();
+    error InsufficientLiquidity();
+    error LPAmountMismatch();
+
+    IUniswapV2Router02 public immutable ROUTER;
+    IUniswapV2Pair public immutable PAIR;
+    IERC20 public immutable TOKEN_A;
+    IERC20 public immutable TOKEN_B;
 
     event LiquidityAdded(address indexed user, uint256 lpAmount, uint256 amountA, uint256 amountB);
 
     event LiquidityRemoved(address indexed user, uint256 lpAmount, uint256 amountA, uint256 amountB);
 
     constructor(address _router, address _pair) {
-        router = IUniswapV2Router02(_router);
-        pair = IUniswapV2Pair(_pair);
-        tokenA = IERC20(pair.token0());
-        tokenB = IERC20(pair.token1());
+        ROUTER = IUniswapV2Router02(_router);
+        PAIR = IUniswapV2Pair(_pair);
+        TOKEN_A = IERC20(PAIR.token0());
+        TOKEN_B = IERC20(PAIR.token1());
     }
 
     function addLiquidityByMint(uint256 lpAmountDesired) external {
-        (uint112 reserve0, uint112 reserve1,) = pair.getReserves();
-        uint256 totalSupply = pair.totalSupply();
+        (uint112 reserve0, uint112 reserve1,) = PAIR.getReserves();
+        uint256 totalSupply = PAIR.totalSupply();
 
-        require(totalSupply > 0, "No liquidity exists");
+        if (totalSupply == 0) revert NoLiquidityExists();
 
         uint256 amountADesired = (lpAmountDesired * reserve0) / totalSupply;
         uint256 amountBDesired = (lpAmountDesired * reserve1) / totalSupply;
 
-        require(amountADesired > 0 && amountBDesired > 0, "Insufficient liquidity");
+        if (amountADesired == 0 || amountBDesired == 0) revert InsufficientLiquidity();
 
-        tokenA.transferFrom(msg.sender, address(this), amountADesired);
-        tokenB.transferFrom(msg.sender, address(this), amountBDesired);
+        TOKEN_A.transferFrom(msg.sender, address(this), amountADesired);
+        TOKEN_B.transferFrom(msg.sender, address(this), amountBDesired);
 
-        tokenA.approve(address(router), amountADesired);
-        tokenB.approve(address(router), amountBDesired);
+        TOKEN_A.approve(address(ROUTER), amountADesired);
+        TOKEN_B.approve(address(ROUTER), amountBDesired);
 
-        (uint256 amountA, uint256 amountB, uint256 liquidity) = router.addLiquidity(
-            address(tokenA), address(tokenB), amountADesired, amountBDesired, 0, 0, msg.sender, block.timestamp + 300
+        (uint256 amountA, uint256 amountB, uint256 liquidity) = ROUTER.addLiquidity(
+            address(TOKEN_A), address(TOKEN_B), amountADesired, amountBDesired, 0, 0, msg.sender, block.timestamp + 300
         );
 
-        require(liquidity >= lpAmountDesired - 1 && liquidity <= lpAmountDesired + 1, "LP amount mismatch");
+        if (liquidity < lpAmountDesired - 1 || liquidity > lpAmountDesired + 1) revert LPAmountMismatch();
 
         if (amountA < amountADesired) {
-            tokenA.transfer(msg.sender, amountADesired - amountA);
+            TOKEN_A.transfer(msg.sender, amountADesired - amountA);
         }
         if (amountB < amountBDesired) {
-            tokenB.transfer(msg.sender, amountBDesired - amountB);
+            TOKEN_B.transfer(msg.sender, amountBDesired - amountB);
         }
 
         emit LiquidityAdded(msg.sender, lpAmountDesired, amountA, amountB);
     }
 
     function removeExactLiquidity(uint256 lpAmount) external {
-        pair.transferFrom(msg.sender, address(pair), lpAmount);
-        (uint256 amountA, uint256 amountB) = pair.burn(msg.sender);
+        PAIR.transferFrom(msg.sender, address(PAIR), lpAmount);
+        (uint256 amountA, uint256 amountB) = PAIR.burn(msg.sender);
 
         emit LiquidityRemoved(msg.sender, lpAmount, amountA, amountB);
     }

@@ -7,6 +7,8 @@ import { IUniswapV2Factory } from "../src/interfaces/IUniswapV2Factory.sol";
 import { console } from "forge-std/src/console.sol";
 
 contract DeployTokensAndPair is Script {
+    error PairAlreadyExists();
+
     function run() public returns (Token tokenA, Token tokenB, address pair) {
         vm.startBroadcast();
 
@@ -21,7 +23,7 @@ contract DeployTokensAndPair is Script {
         IUniswapV2Factory factory = IUniswapV2Factory(factoryAddress);
 
         address existingPair = factory.getPair(address(tokenA), address(tokenB));
-        require(existingPair == address(0), "Pair already exists");
+        if (existingPair != address(0)) revert PairAlreadyExists();
 
         pair = factory.createPair(address(tokenA), address(tokenB));
 

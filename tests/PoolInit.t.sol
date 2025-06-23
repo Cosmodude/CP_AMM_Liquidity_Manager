@@ -5,13 +5,10 @@ import { Test } from "forge-std/src/Test.sol";
 import { console } from "forge-std/src/console.sol";
 import { PoolInit } from "../script/PoolInit.s.sol";
 import { Token } from "../src/TokenA.sol";
-import { IUniswapV2Factory } from "../src/interfaces/IUniswapV2Factory.sol";
 import { IUniswapV2Pair } from "../src/interfaces/IUniswapV2Pair.sol";
-import { IERC20 } from "../src/interfaces/IERC20.sol";
-import { IUniswapV2Router02 } from "../src/interfaces/IUniswapV2Router02.sol";
 
 contract PoolInitTest is Test {
-    PoolInit poolInit;
+    PoolInit public poolInit;
 
     Token public tokenA;
     Token public tokenB;
@@ -19,11 +16,11 @@ contract PoolInitTest is Test {
     uint256 public liquidity;
 
     // Sepolia addresses
-    address constant UNISWAP_V2_FACTORY_SEPOLIA = 0xF62c03E08ada871A0bEb309762E260a7a6a880E6;
-    address constant UNISWAP_V2_ROUTER_SEPOLIA = 0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3;
+    address public constant UNISWAP_V2_FACTORY_SEPOLIA = 0xF62c03E08ada871A0bEb309762E260a7a6a880E6;
+    address public constant UNISWAP_V2_ROUTER_SEPOLIA = 0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3;
 
     // Test account
-    address testUser = makeAddr("testUser");
+    address public testUser = makeAddr("testUser");
 
     function setUp() public {
         // Fork Sepolia

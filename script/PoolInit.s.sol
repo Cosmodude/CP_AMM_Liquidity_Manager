@@ -5,11 +5,12 @@ import { Script } from "forge-std/src/Script.sol";
 import { Token } from "../src/TokenA.sol";
 import { IUniswapV2Router02 } from "../src/interfaces/IUniswapV2Router02.sol";
 import { IUniswapV2Factory } from "../src/interfaces/IUniswapV2Factory.sol";
-import { IUniswapV2Pair } from "../src/interfaces/IUniswapV2Pair.sol";
-import { IERC20 } from "../src/interfaces/IERC20.sol";
 import { console } from "forge-std/src/console.sol";
 
 contract PoolInit is Script {
+    error TokenABalanceMismatch();
+    error TokenBBalanceMismatch();
+
     struct DeploymentData {
         address caller;
         address routerAddress;
@@ -47,8 +48,8 @@ contract PoolInit is Script {
         tokenA.mint(data.caller, data.mintAmount);
         tokenB.mint(data.caller, data.mintAmount);
 
-        require(tokenA.balanceOf(data.caller) == data.mintAmount, "Token A balance mismatch");
-        require(tokenB.balanceOf(data.caller) == data.mintAmount, "Token B balance mismatch");
+        if (tokenA.balanceOf(data.caller) != data.mintAmount) revert TokenABalanceMismatch();
+        if (tokenB.balanceOf(data.caller) != data.mintAmount) revert TokenBBalanceMismatch();
 
         console.log("Minted", data.mintAmount, "tokens of each type to", data.caller);
 

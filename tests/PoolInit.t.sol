@@ -36,9 +36,9 @@ contract PoolInitTest is Test {
         poolInit = new PoolInit();
         
         // Set environment variables
-        vm.setEnv("UNISWAP_V2_ROUTER_ADDRESS_SEPOLIA", addressToString(UNISWAP_V2_ROUTER_SEPOLIA));
-        vm.setEnv("UNISWAP_V2_FACTORY_ADDRESS_SEPOLIA", addressToString(UNISWAP_V2_FACTORY_SEPOLIA));
-        vm.setEnv("DEV_ADDRESS", addressToString(testUser));
+        vm.setEnv("UNISWAP_V2_ROUTER_ADDRESS_SEPOLIA", vm.toString(UNISWAP_V2_ROUTER_SEPOLIA));
+        vm.setEnv("UNISWAP_V2_FACTORY_ADDRESS_SEPOLIA", vm.toString(UNISWAP_V2_FACTORY_SEPOLIA));
+        vm.setEnv("DEV_ADDRESS", vm.toString(testUser));
         
         (tokenA, tokenB, pair, liquidity) = poolInit.run();
     }
@@ -107,9 +107,5 @@ contract PoolInitTest is Test {
         assertEq(tokenB.balanceOf(randomUser), mintAmount, "Random user should be able to mint token B");
         
         vm.stopPrank();
-    }
-    
-    function addressToString(address addr) internal pure returns (string memory) {
-        return vm.toString(addr);
     }
 } 
